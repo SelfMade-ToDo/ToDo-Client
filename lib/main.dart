@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Startup Name Generator',
       initialRoute: '/login',
       routes: {
-        '/': (context) => MainPage(),
+        // '/': (context) => MainPage(),
         '/login': (context) => const LoginPage(),
         '/menu': (context) => const MenuPage(),
       },

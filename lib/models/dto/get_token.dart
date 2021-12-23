@@ -1,11 +1,22 @@
 class GetToken {
-  late String access_token;
+  late String name;
+  late String email;
+  late String accessToken;
 
-  GetToken({required this.access_token});
+  GetToken({required this.name, required this.email, required this.accessToken});
 
   factory GetToken.fromJson(Map<String, dynamic> userMap) {
     return GetToken(
-        access_token: userMap['access_token'],
+        name: userMap['name'],
+        email: userMap['email'],
+        accessToken: userMap['access_token'],
     );
   }
+
+  Map<String, dynamic> toJson() => 
+  {
+    'name': name,
+    'email': email,
+    'accessToken': accessToken
+  };
 }

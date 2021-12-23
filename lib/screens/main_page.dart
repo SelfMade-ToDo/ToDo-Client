@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:todo_client/screens/menu_page.dart';
 
 class MainPage extends StatefulWidget{
-  String name = 'user';
-  MainPage({Key? key, String? name}) : super(key: key);
+  late String name;
+  MainPage({ required this.name});
 
   @override
   _MainPageState createState() => _MainPageState(name: name);
@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage>{
           Text('hello $name'),
           Padding(
             padding: const EdgeInsets.only(top: 50),
-            child: Image.asset("Assets/Bart_cute.jpeg", width:250),  
+            child: Image.asset("Assets/bart.jpeg", width:250),  
           )
         ],
       ),

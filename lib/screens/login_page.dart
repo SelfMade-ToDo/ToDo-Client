@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:todo_client/Function/session.dart';
 import 'package:todo_client/models/dto/get_token.dart';
 import 'package:todo_client/models/dto/login_dto.dart';
-import 'package:todo_client/models/user.dart';
+import 'package:todo_client/screens/main_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -16,12 +18,39 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   late TextEditingController _emailCtrl;
   late TextEditingController _passwordCtrl;
+  late GetToken userInfo;
+  static const storage = FlutterSecureStorage();
 
   @override
   void initState(){
     super.initState();
     _emailCtrl = TextEditingController(text: '');
     _passwordCtrl = TextEditingController(text: '');
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _asyncMethod();
+    });
+  }
+
+  _asyncMethod() async {
+    //read 함수를 통하여 key값에 맞는 정보를 불러오게 됩니다. 이때 불러오는 결과의 타입은 String 타입임을 기억해야 합니다.
+    //(데이터가 없을때는 null을 반환을 합니다.)
+    userInfo = (await storage.read(key: "login")) as GetToken;
+    if (kDebugMode) {
+      print(userInfo);
+    }
+
+    //user의 정보가 있다면 바로 로그아웃 페이지로 넝어가게 합니다.
+    if (userInfo != null) {
+      Navigator.pushReplacement(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => MainPage(
+            name: userInfo.name,
+          )
+        )
+      );
+    }
   }
 
   @override
@@ -92,6 +121,20 @@ class _LoginPageState extends State<LoginPage> {
       print(_passwordCtrl);
       print(token);
     }
+
+    await storage.write(
+      key: "login",
+      value: token.toJson().toString()
+    );
+
+    Navigator.pushReplacement(
+      context,
+      CupertinoPageRoute(
+          builder: (context) => MainPage(
+            name: token.name,
+          )
+        ),
+      );
   }
 
   // void _loginCheck() async {
