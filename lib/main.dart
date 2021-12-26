@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:todo_client/screens/login_page.dart';
-import 'package:todo_client/screens/main_page.dart';
 import 'package:todo_client/screens/menu_page.dart';
 void main() => runApp(const MyApp());
 

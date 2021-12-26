@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:todo_client/models/todo.dart';
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:todo_client/screens/menu_page.dart';
+import 'package:todo_client/widgets/main_page_widgets.dart';
 
 class MainPage extends StatefulWidget{
   late String name;
@@ -13,8 +15,8 @@ class MainPage extends StatefulWidget{
 
 class _MainPageState extends State<MainPage>{
   // final storage = const FlutterSecureStorage();
-  final _items = <String>[];
-  late TextEditingController _todoName;
+  final _items = <Todo>[];
+  late TextEditingController _todoCtrl;
   String name;
 
   _MainPageState({required this.name});
@@ -22,12 +24,12 @@ class _MainPageState extends State<MainPage>{
   @override
   void initState(){
     super.initState();
-    _todoName = TextEditingController(text: '');
+    _todoCtrl = TextEditingController(text: '');
   }
 
   @override
   void dispose(){
-    _todoName.dispose();
+    _todoCtrl.dispose();
     super.dispose();
   }
   
@@ -60,7 +62,7 @@ class _MainPageState extends State<MainPage>{
           // todo 목록
           Expanded(
             child: ListView(
-              children: _items.map((todo) => _buildItemWidget(name)).toList(),
+              children: _items.map((todo) => MainPageWidgets().buildItemWidget(todo)).toList(),
             )
           )
         ],
@@ -70,21 +72,12 @@ class _MainPageState extends State<MainPage>{
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            builder: buildBottomSheet
+            // addPlan 때문에 MainPage()를 써야 하는데 생성자가 MainPage(name: name)밖에 없는데 MainPage() 만들어 써도 될라나?
+            // builder: (BuildContext context) => MainPageWidgets().buildBottomSheet(context, _todoCtrl)
+            builder: (BuildContext context) => buildBottomSheet(context),
           );
         },
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget _buildItemWidget(String name){
-    return ListTile(
-      trailing: IconButton(
-        onPressed: () {
-
-        },
-        icon: const Icon(Icons.delete)
       ),
     );
   }
@@ -95,11 +88,15 @@ class _MainPageState extends State<MainPage>{
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextField(
-          controller: _todoName,
+          controller: _todoCtrl,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: '이름',
           ),
+        ),
+        ElevatedButton(
+          child: const Text('확인'),
+          onPressed: () => addPlan(Todo.withName(name: _todoCtrl.text)),
         ),
         ElevatedButton(
           child: const Text('Close BottomSheet'),
@@ -108,4 +105,26 @@ class _MainPageState extends State<MainPage>{
       ],
     );
   }
+
+  // todo 목록에 추가
+  void addPlan(Todo todo){
+    setState(() {
+      _items.add(todo);
+    });
+  }
+
+  // todo 목록에서 삭제
+  void deletePlan(Todo todo){
+    setState(() {
+      _items.remove(todo);
+    });
+  }
+
+  // todo 상태 변경
+  void changeState(Todo todo){
+    setState(() {
+      todo.isFinished = !todo.isFinished;
+    });
+  }
+
 }

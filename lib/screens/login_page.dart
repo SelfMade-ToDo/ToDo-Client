@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose(){
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
-    
+
     super.dispose();
   }
 
