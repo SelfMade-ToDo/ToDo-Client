@@ -1,25 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:todo_client/models/todo.dart';
+// import 'package:flutter/material.dart';
+// import 'package:todo_client/models/todo.dart';
 
 class MainPageWidgets{
-  // todo 한 개
-  Widget buildItemWidget(Todo todo){
-    return ListTile(
-      trailing: IconButton(
-        onPressed: () {
+  // // todo 한 개
+  // Widget buildItemWidget(Todo todo){
+  //   return ListTile(
+  //     trailing: IconButton(
+  //       onPressed: () {
 
-        },
-        icon: const Icon(Icons.delete)
-      ),
-      title: Text(
-        todo.name,
-        style: todo.isFinished ? const TextStyle(
-          decoration: TextDecoration.lineThrough,
-          color: Colors.red,
-        ) : null ,
-      ),
-    );
-  }
+  //       },
+  //       icon: const Icon(Icons.delete)
+  //     ),
+  //     title: Text(
+  //       todo.name,
+  //       style: todo.isFinished ? const TextStyle(
+  //         decoration: TextDecoration.lineThrough,
+  //         color: Colors.red,
+  //       ) : null ,
+  //     ),
+  //   );
+  // }
 
   // // 플러스 버튼 눌렀을떄 밑에서 나오는 창
   // Widget buildBottomSheet(BuildContext context, TextEditingController todoCtrl) {

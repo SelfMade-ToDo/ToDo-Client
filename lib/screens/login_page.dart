@@ -53,9 +53,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
         context,
         CupertinoPageRoute(
-          builder: (context) => MainPage(
-            name: userInfo.name,
-          )
+          builder: (context) => const MainPage()
         )
       );
     }
@@ -115,21 +113,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login() async {
-    GetToken token = await Session().mainPageService.login(
-      'http://localhost:3000/auth/login',
+    GetToken token = await Session().loginPageService.login(
+      'https://selfmade-todo.herokuapp.com/auth/login',
       Login(
         email: _emailCtrl.text,
         password: _passwordCtrl.text
       ),
       Session().JSONheaders
     );
-
-    if (kDebugMode) {
-      print('reslut:');
-      print(_emailCtrl);
-      print(_passwordCtrl);
-      print(token);
-    }
 
     await storage.write(
       key: "login",
@@ -139,9 +130,7 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pushReplacement(
       context,
       CupertinoPageRoute(
-          builder: (context) => MainPage(
-            name: token.name,
-          )
+          builder: (context) => MainPage()
         ),
       );
   }

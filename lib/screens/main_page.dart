@@ -1,28 +1,39 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_client/Function/session.dart';
+import 'package:todo_client/models/dto/plan_list_dto.dart';
 import 'package:todo_client/models/todo.dart';
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:todo_client/screens/menu_page.dart';
-import 'package:todo_client/widgets/main_page_widgets.dart';
 
 class MainPage extends StatefulWidget{
-  late String name;
 
-  MainPage({ required this.name});
+  const MainPage({Key? key, }) : super(key: key);
 
   @override
-  _MainPageState createState() => _MainPageState(name: name);
+  _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage>{
-  // final storage = const FlutterSecureStorage();
-  final _items = <Todo>[];
+class _MainPageState extends State<MainPage> {
+  final storage = const FlutterSecureStorage();
+  final Future<PlanList> _items = Session().mainPageService.getPlanList(
+      "https://selfmade-todo.herokuapp.com/todo",
+      Session().JSONheadersWithToken(getKey())
+    );
+
+  String getKey(){
+    String token = '';
+  
+    () async {
+      token = (await storage.read(key: "login"))!;
+    };
+
+    return token;
+  }
   late TextEditingController _todoCtrl;
-  String name;
-
-  _MainPageState({required this.name});
-
+  
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _todoCtrl = TextEditingController(text: '');
   }
@@ -37,6 +48,10 @@ class _MainPageState extends State<MainPage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.sick_outlined), onPressed: (){
+          getPlanList();
+        },),
+        backgroundColor: Colors.purple[300],
         actions: [
           IconButton(
             onPressed: () => {
@@ -53,7 +68,7 @@ class _MainPageState extends State<MainPage>{
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // 유저 이름
-          Text('hello $name'),
+          const Text('hello User'),
           // 사진
           Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -62,7 +77,8 @@ class _MainPageState extends State<MainPage>{
           // todo 목록
           Expanded(
             child: ListView(
-              children: _items.map((todo) => MainPageWidgets().buildItemWidget(todo)).toList(),
+              // children: _items.map((todo) => MainPageWidgets().buildItemWidget(todo)).toList(),
+              // children: (await _items).planList.map((todo) => buildItemWidget(todo)).toList(),
             )
           )
         ],
@@ -96,7 +112,11 @@ class _MainPageState extends State<MainPage>{
         ),
         ElevatedButton(
           child: const Text('확인'),
-          onPressed: () => addPlan(Todo.withName(name: _todoCtrl.text)),
+          onPressed: () {
+            addPlan(Todo.withName(name: _todoCtrl.text));
+            _todoCtrl.text = '';
+            Navigator.pop(context);
+          },
         ),
         ElevatedButton(
           child: const Text('Close BottomSheet'),
@@ -106,17 +126,37 @@ class _MainPageState extends State<MainPage>{
     );
   }
 
+  // todo 한 개
+  Widget buildItemWidget(Todo todo){
+    return ListTile(
+      onTap: () => changeState(todo),
+      trailing: IconButton(
+        onPressed: () {
+          deletePlan(todo);
+        },
+        icon: const Icon(Icons.delete)
+      ),
+      title: Text(
+        todo.name,
+        style: todo.isFinished ? const TextStyle(
+          decoration: TextDecoration.lineThrough,
+          color: Colors.red,
+        ) : null ,
+      ),
+    );
+  }
+
   // todo 목록에 추가
   void addPlan(Todo todo){
-    setState(() {
-      _items.add(todo);
+    setState(() async {
+      (await _items).planList.add(todo);
     });
   }
 
   // todo 목록에서 삭제
-  void deletePlan(Todo todo){
-    setState(() {
-      _items.remove(todo);
+  void deletePlan(Todo todo) {
+    setState(() async {
+      (await _items).planList.remove(todo);
     });
   }
 
@@ -127,4 +167,11 @@ class _MainPageState extends State<MainPage>{
     });
   }
 
+  void getPlanList() async {
+  if (kDebugMode) {
+      print('test 출력');
+      print(await _items);
+      print((await _items).planList);
+    }
+  }
 }

@@ -1,16 +1,24 @@
 import 'dart:convert';
 
-import 'package:todo_client/models/dto/get_token.dart';
-import 'package:todo_client/models/dto/login_dto.dart';
 import 'package:http/http.dart' as http;
+import 'package:todo_client/models/dto/plan_list_dto.dart';
 
 class MainPageService {
-  Future<GetToken> login(String url, Login data, Map<String, String> headers) async {
-    http.Response response = await http.post(
+  Future<PlanList> getPlanList(String url, Map<String, String> headers) async {
+    http.Response response = await http.get(
       Uri.parse(url), 
-      body: json.encode(data.toJson()), headers: headers
+      headers: headers
     );
 
-    return GetToken.fromJson(json.decode(response.body));
+    if(response.body == '{"statusCode":401,"message":"Unauthorized"}'){
+      throw Exception();
+    }
+
+    print(response.body);
+
+    print('로직에서 출력');
+    print(PlanList.fromJson(json.decode(response.body)));
+
+    return PlanList.fromJson(json.decode(response.body));
   }
 }
