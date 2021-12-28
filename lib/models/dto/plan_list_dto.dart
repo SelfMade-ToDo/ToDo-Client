@@ -1,7 +1,3 @@
-import 'dart:ffi';
-
-import 'package:todo_client/models/todo.dart';
-
 class PlanList {
   late List<dynamic> planList;
 

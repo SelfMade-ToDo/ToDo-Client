@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:todo_client/models/dto/add_plan.dart';
+import 'package:todo_client/models/dto/get_add_plan.dart';
+import 'package:todo_client/models/dto/plan.dart';
 import 'package:todo_client/models/dto/plan_list_dto.dart';
 
 class MainPageService {
@@ -15,5 +18,18 @@ class MainPageService {
     }
 
     return PlanList.fromJson(json.decode(response.body));
+  }
+
+  Future<Plan> addPlan(String url, AddPlan data, Map<String, String> headers) async {
+    http.Response response = await http.post(
+      Uri.parse(url), 
+      headers: headers,
+      body: json.encode(data.toJson()),
+    );
+
+    GetAddPlan getAddPlan = GetAddPlan.fromJson(json.decode(response.body));
+    Plan plan = getAddPlan.plan;
+
+    return plan;
   }
 }
