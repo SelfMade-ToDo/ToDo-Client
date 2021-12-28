@@ -14,11 +14,6 @@ class MainPageService {
       throw Exception();
     }
 
-    print(response.body);
-
-    print('로직에서 출력');
-    print(PlanList.fromJson(json.decode(response.body)));
-
     return PlanList.fromJson(json.decode(response.body));
   }
 }

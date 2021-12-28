@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_client/Function/session.dart';
+import 'package:todo_client/models/dto/get_token.dart';
 import 'package:todo_client/models/dto/plan_list_dto.dart';
 import 'package:todo_client/models/todo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,12 +16,6 @@ class MainPage extends StatefulWidget{
 }
 
 class _MainPageState extends State<MainPage> {
-  final storage = const FlutterSecureStorage();
-  final Future<PlanList> _items = Session().mainPageService.getPlanList(
-      "https://selfmade-todo.herokuapp.com/todo",
-      Session().JSONheadersWithToken(getKey())
-    );
-
   String getKey(){
     String token = '';
   
@@ -30,6 +25,18 @@ class _MainPageState extends State<MainPage> {
 
     return token;
   }
+
+  final storage = const FlutterSecureStorage();
+  // PlanList _items = storage.read(key: "login").then((token) => {
+  //   Session().mainPageService.getPlanList(
+  //   "https://selfmade-todo.herokuapp.com/todo",
+  //   Session().JSONheadersWithToken(token)
+  // );
+  // })
+  
+
+  
+
   late TextEditingController _todoCtrl;
   
   @override
@@ -37,20 +44,11 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     _todoCtrl = TextEditingController(text: '');
   }
-
-  @override
-  void dispose(){
-    _todoCtrl.dispose();
-    super.dispose();
-  }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: Icon(Icons.sick_outlined), onPressed: (){
-          getPlanList();
-        },),
         backgroundColor: Colors.purple[300],
         actions: [
           IconButton(
@@ -76,9 +74,31 @@ class _MainPageState extends State<MainPage> {
           ),
           // todo 목록
           Expanded(
-            child: ListView(
-              // children: _items.map((todo) => MainPageWidgets().buildItemWidget(todo)).toList(),
-              // children: (await _items).planList.map((todo) => buildItemWidget(todo)).toList(),
+            child: FutureBuilder(
+              future: buildPlans(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  //해당 부분은 data를 아직 받아 오지 못했을때 실행되는 부분을 의미한다.
+                  if (snapshot.hasData == false) {
+                    return const CircularProgressIndicator();
+                  }
+                  //error가 발생하게 될 경우 반환하게 되는 부분
+                  else if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    );
+                  }
+                  // 데이터를 정상적으로 받아오게 되면 다음 부분을 실행하게 되는 것이다.
+                  else {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: snapshot.data,
+                    );
+                  }
+                },
             )
           )
         ],
@@ -126,19 +146,34 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  Future<ListView> buildPlans() async {
+
+    PlanList plans = await Session().mainPageService.getPlanList(
+      "https://selfmade-todo.herokuapp.com/todo",
+      Session().JSONheadersWithToken((await storage.read(key: "login"))!)
+    );
+
+    return ListView(
+      // children: _items.map((todo) => MainPageWidgets().buildItemWidget(todo)).toList(),
+      children: plans.planList.map((todo) => buildItemWidget(todo)).toList(),
+    );
+  }
+
   // todo 한 개
-  Widget buildItemWidget(Todo todo){
+  Widget buildItemWidget(dynamic todo){
+    Todo newTodo = Todo.fromJson(todo);
+
     return ListTile(
-      onTap: () => changeState(todo),
+      onTap: () => changeState(newTodo),
       trailing: IconButton(
         onPressed: () {
-          deletePlan(todo);
+          deletePlan(newTodo);
         },
         icon: const Icon(Icons.delete)
       ),
       title: Text(
-        todo.name,
-        style: todo.isFinished ? const TextStyle(
+        newTodo.name,
+        style: newTodo.isFinished ? const TextStyle(
           decoration: TextDecoration.lineThrough,
           color: Colors.red,
         ) : null ,
@@ -149,14 +184,14 @@ class _MainPageState extends State<MainPage> {
   // todo 목록에 추가
   void addPlan(Todo todo){
     setState(() async {
-      (await _items).planList.add(todo);
+      // (await _items).planList.add(todo);
     });
   }
 
   // todo 목록에서 삭제
   void deletePlan(Todo todo) {
     setState(() async {
-      (await _items).planList.remove(todo);
+      // (await _items).planList.remove(todo);
     });
   }
 
@@ -165,13 +200,5 @@ class _MainPageState extends State<MainPage> {
     setState(() {
       todo.isFinished = !todo.isFinished;
     });
-  }
-
-  void getPlanList() async {
-  if (kDebugMode) {
-      print('test 출력');
-      print(await _items);
-      print((await _items).planList);
-    }
   }
 }

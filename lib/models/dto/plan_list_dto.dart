@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:todo_client/models/todo.dart';
 
 class PlanList {
-  late List<Todo> planList;
+  late List<dynamic> planList;
 
 
   PlanList({required this.planList});

@@ -124,13 +124,13 @@ class _LoginPageState extends State<LoginPage> {
 
     await storage.write(
       key: "login",
-      value: token.toJson().toString()
+      value: token.accessToken,
     );
 
     Navigator.pushReplacement(
       context,
       CupertinoPageRoute(
-          builder: (context) => MainPage()
+          builder: (context) => const MainPage()
         ),
       );
   }

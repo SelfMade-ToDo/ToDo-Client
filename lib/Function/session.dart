@@ -8,7 +8,7 @@ class Session {
   };
 
   Map<String, String> JSONheadersWithToken (String token) {
-    JSONheaders['Authorization'] = token;
+    JSONheaders['Authorization'] = 'Bearer $token';
     return JSONheaders;
   }
 
