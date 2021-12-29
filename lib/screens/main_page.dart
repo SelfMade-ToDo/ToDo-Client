@@ -174,12 +174,13 @@ class _MainPageState extends State<MainPage> {
   }
 
   // todo 목록에 추가
-  void addPlan(AddPlan addPlan){
-    setState(() async {
+  void addPlan(AddPlan addPlan) async {
+    String token = (await storage.read(key: "login"))!;
+    setState(() {
       MainPageService().addPlan(
         'https://selfmade-todo.herokuapp.com/todo',
         addPlan,
-        Session().JSONheadersWithToken((await storage.read(key: "login"))!)
+        Session().JSONheadersWithToken(token)
       );
     });
   }
