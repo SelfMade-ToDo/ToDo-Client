@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_client/Function/session.dart';
+import 'package:todo_client/models/dto/add_plan.dart';
 import 'package:todo_client/models/dto/get_token.dart';
 import 'package:todo_client/models/dto/plan_list_dto.dart';
 import 'package:todo_client/models/todo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:todo_client/screens/menu_page.dart';
+import 'package:todo_client/services/main_page_service.dart';
 
 class MainPage extends StatefulWidget{
 
@@ -16,33 +18,15 @@ class MainPage extends StatefulWidget{
 }
 
 class _MainPageState extends State<MainPage> {
-  String getKey(){
-    String token = '';
-  
-    () async {
-      token = (await storage.read(key: "login"))!;
-    };
-
-    return token;
-  }
-
   final storage = const FlutterSecureStorage();
-  // PlanList _items = storage.read(key: "login").then((token) => {
-  //   Session().mainPageService.getPlanList(
-  //   "https://selfmade-todo.herokuapp.com/todo",
-  //   Session().JSONheadersWithToken(token)
-  // );
-  // })
-  
-
-  
-
-  late TextEditingController _todoCtrl;
+  late TextEditingController _nameCtrl;
+  late TextEditingController _descriptionCtrl;
   
   @override
   void initState() {
     super.initState();
-    _todoCtrl = TextEditingController(text: '');
+    _nameCtrl = TextEditingController(text: '');
+    _descriptionCtrl = TextEditingController(text: '');
   }
   
   @override
@@ -124,17 +108,25 @@ class _MainPageState extends State<MainPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextField(
-          controller: _todoCtrl,
+          controller: _nameCtrl,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: '이름',
           ),
         ),
+        TextField(
+          controller: _descriptionCtrl,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: '설명',
+          ),
+        ),
         ElevatedButton(
           child: const Text('확인'),
           onPressed: () {
-            addPlan(Todo.withName(name: _todoCtrl.text));
-            _todoCtrl.text = '';
+            addPlan(AddPlan(name: _nameCtrl.text, description: _descriptionCtrl.text));
+            _nameCtrl.text = '';
+            _descriptionCtrl.text = '';
             Navigator.pop(context);
           },
         ),
@@ -182,9 +174,13 @@ class _MainPageState extends State<MainPage> {
   }
 
   // todo 목록에 추가
-  void addPlan(Todo todo){
+  void addPlan(AddPlan addPlan){
     setState(() async {
-      // (await _items).planList.add(todo);
+      MainPageService().addPlan(
+        'https://selfmade-todo.herokuapp.com/todo',
+        addPlan,
+        Session().JSONheadersWithToken((await storage.read(key: "login"))!)
+      );
     });
   }
 

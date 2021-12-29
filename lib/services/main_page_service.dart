@@ -28,7 +28,8 @@ class MainPageService {
     );
 
     GetAddPlan getAddPlan = GetAddPlan.fromJson(json.decode(response.body));
-    Plan plan = getAddPlan.plan;
+    
+    Plan plan = Plan.fromJson(getAddPlan.plan);
 
     return plan;
   }

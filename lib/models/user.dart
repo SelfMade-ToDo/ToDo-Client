@@ -2,14 +2,16 @@ class User {
   final int userId;
   final String name;
   final String email;
+  final String password;
   
-  User({required this.userId, required this.name, required this.email});
+  User({required this.userId, required this.name, required this.email, required this.password});
   
-  factory User.fromJson(Map<String, dynamic> userMap) {
+  factory User.fromJson(Map<String, dynamic> map) {
     return User(
-        userId: userMap['id'],
-        name: userMap['name'],
-        email: userMap['email'],
+        userId: map['id'],
+        name: map['name'],
+        email: map['email'],
+        password: map['password'],
     );
   }
 }
