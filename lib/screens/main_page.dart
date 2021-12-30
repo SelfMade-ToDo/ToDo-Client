@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_client/Function/session.dart';
 import 'package:todo_client/models/dto/add_plan.dart';
-import 'package:todo_client/models/dto/get_token.dart';
 import 'package:todo_client/models/dto/plan_list_dto.dart';
 import 'package:todo_client/models/todo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -91,6 +89,7 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
+            isScrollControlled: true,
             context: context,
             // addPlan 때문에 MainPage()를 써야 하는데 생성자가 MainPage(name: name)밖에 없는데 MainPage() 만들어 써도 될라나?
             // builder: (BuildContext context) => MainPageWidgets().buildBottomSheet(context, _todoCtrl)
@@ -104,37 +103,48 @@ class _MainPageState extends State<MainPage> {
 
   // 플러스 버튼 눌렀을떄 밑에서 나오는 창
   Widget buildBottomSheet(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TextField(
-          controller: _nameCtrl,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: '이름',
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    return Padding(
+      padding: mediaQueryData.viewInsets,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 10, right: 15, left: 15, bottom: 5),
+            child: TextField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '이름',
+              ),
+            ),
           ),
-        ),
-        TextField(
-          controller: _descriptionCtrl,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: '설명',
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 5),
+            child: TextField(
+              controller: _descriptionCtrl,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '설명',
+              ),
+            ),
           ),
-        ),
-        ElevatedButton(
-          child: const Text('확인'),
-          onPressed: () {
-            addPlan(AddPlan(name: _nameCtrl.text, description: _descriptionCtrl.text));
-            _nameCtrl.text = '';
-            _descriptionCtrl.text = '';
-            Navigator.pop(context);
-          },
-        ),
-        ElevatedButton(
-          child: const Text('Close BottomSheet'),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 10),
+            child: ElevatedButton(
+            child: const Text('확인'),
+            onPressed: () {
+              addPlan(AddPlan(name: _nameCtrl.text, description: _descriptionCtrl.text));
+              _nameCtrl.text = '';
+              _descriptionCtrl.text = '';
+              Navigator.pop(context);
+            },
+          ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -159,7 +169,7 @@ class _MainPageState extends State<MainPage> {
       onTap: () => changeState(newTodo),
       trailing: IconButton(
         onPressed: () {
-          deletePlan(newTodo);
+          deletePlan(newTodo.todoId);
         },
         icon: const Icon(Icons.delete)
       ),
@@ -180,17 +190,34 @@ class _MainPageState extends State<MainPage> {
       MainPageService().addPlan(
         'https://selfmade-todo.herokuapp.com/todo',
         addPlan,
-        Session().JSONheadersWithToken(token)
+        Session().JSONheadersWithToken(token) 
       );
     });
   }
 
   // todo 목록에서 삭제
-  void deletePlan(Todo todo) {
-    setState(() async {
-      // (await _items).planList.remove(todo);
+  void deletePlan(int planId) async {
+    String token = (await storage.read(key: "login"))!;
+    setState(() {
+      MainPageService().deletePlan(
+        'https://selfmade-todo.herokuapp.com/todo/$planId',
+        Session().JSONheadersWithToken(token)
+      );
     });
   }
+
+  // ModifyPlan isn't a type. Try correcting the name to match an existing type.
+  // todo 수정
+  // void ModifyPlan(ModifyPlan modifyPlan) async {
+  //   String token = (await storage.read(key: "login"))!;
+  //   setState(() {
+  //     MainPageService().modifyPlan(
+  //       'https://selfmade-todo.herokuapp.com/todo',
+  //       modifyPlan,
+  //       Session().JSONheadersWithToken(token)
+  //     );
+  //   });
+  // }
 
   // todo 상태 변경
   void changeState(Todo todo){
